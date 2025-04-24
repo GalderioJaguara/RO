@@ -11,4 +11,8 @@ public record LoginResponse {
     public DateTime ExpirationDate { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IList<string>? Roles { get; set; } = null;
+
+    public LoginResponse() {
+        
+    }
 }
