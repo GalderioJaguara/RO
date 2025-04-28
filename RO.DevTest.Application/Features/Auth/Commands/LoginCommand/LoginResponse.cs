@@ -12,7 +12,5 @@ public record LoginResponse {
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public IList<string>? Roles { get; set; } = null;
 
-    public LoginResponse() {
-        
-    }
+    
 }

@@ -2,6 +2,10 @@
 using RO.DevTest.Application.Contracts.Infrastructure;
 using RO.DevTest.Domain.Entities;
 using RO.DevTest.Domain.Enums;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace RO.DevTest.Infrastructure.Abstractions;
 
@@ -53,5 +57,29 @@ public class IdentityAbstractor : IIdentityAbstractor {
         }
 
         return await _userManager.AddToRoleAsync(user, role.ToString());
+    }
+    public async Task<string> GenerateJwtTokenAsync(User user, IList<string> roles) {
+        var claims = new List<Claim> {
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+        };
+
+        foreach (var role in roles) {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("YourSecretKeyHere"));
+        var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var token = new JwtSecurityToken(
+            issuer: "YourIssuer",
+            audience: "YourAudience",
+            claims: claims,
+            expires: DateTime.Now.AddHours(1),
+            signingCredentials: creds
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 }
